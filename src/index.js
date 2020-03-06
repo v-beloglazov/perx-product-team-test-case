@@ -1,12 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+
 import './index.css';
-import App from './App';
+
+import rootReducer from './reducers';
+
+const store = configureStore({
+  reducer: rootReducer,
+});
 
 const render = initialData => {
+  const App = require('./App').default;
+
   const { dealers } = initialData;
   return ReactDOM.render(
-    <App initialDealers={dealers} />,
+    <Provider store={store}>
+      <App initialDealers={dealers} />
+    </Provider>,
     document.getElementById('root')
   );
 };
