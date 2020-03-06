@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,8 +7,18 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
-import { makeStyles, IconButton } from '@material-ui/core';
+import {
+  makeStyles,
+  IconButton,
+  Card,
+  CardMedia,
+  CircularProgress,
+  CardContent,
+} from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGoods } from './features/goods/goodsSlice';
+import { getImageUrl } from './api';
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -33,11 +43,28 @@ const useStyles = makeStyles(() => ({
   title: {
     flexGrow: 1,
   },
+  card: {
+    display: 'flex',
+  },
+  itemImage: {
+    height: 100,
+    width: 100,
+    objectFit: 'contain',
+  },
 }));
 
 function App({ initialDealers }) {
-  const classes = useStyles();
+  const dispatch = useDispatch();
 
+  const { goods, loading: goodsLoading } = useSelector(state => state.goods);
+  useEffect(() => {
+    dispatch(fetchGoods(initialDealers));
+  }, [dispatch, initialDealers]);
+
+  const classes = useStyles();
+  if (goodsLoading) {
+    return <CircularProgress />;
+  }
   return (
     <React.Fragment>
       <CssBaseline />
@@ -56,7 +83,26 @@ function App({ initialDealers }) {
       <Toolbar />
       <Container>
         <Box my={2}>
-          
+          {goods.map(item => {
+            return (
+              <Box mb={2} key={item.name}>
+                <Card className={classes.card}>
+                  <CardMedia
+                    component='img'
+                    alt={item.name}
+                    className={classes.itemImage}
+                    title={item.name}
+                    image={getImageUrl(item.image)}
+                  />
+                  {/* <img alt={item.name} src={getImageUrl(item.image)} /> */}
+                  <CardContent>
+                    <Typography gutterBottom>{item.name}</Typography>
+                    <Typography>{item.price}</Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            );
+          })}
         </Box>
       </Container>
     </React.Fragment>
