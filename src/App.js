@@ -45,11 +45,13 @@ const useStyles = makeStyles(() => ({
   },
   card: {
     display: 'flex',
+    maxWidth: '350px'
   },
   itemImage: {
     height: 100,
     width: 100,
     objectFit: 'contain',
+    margin: '5px'
   },
 }));
 
@@ -86,7 +88,7 @@ function App({ initialDealers }) {
           {goods.map(item => {
             return (
               <Box mb={2} key={item.name}>
-                <Card className={classes.card}>
+                <Card className={classes.card} variant="outlined">
                   <CardMedia
                     component='img'
                     alt={item.name}
@@ -94,10 +96,9 @@ function App({ initialDealers }) {
                     title={item.name}
                     image={getImageUrl(item.image)}
                   />
-                  {/* <img alt={item.name} src={getImageUrl(item.image)} /> */}
                   <CardContent>
-                    <Typography gutterBottom>{item.name}</Typography>
-                    <Typography>{item.price}</Typography>
+                    <Typography gutterBottom variant="h6">{item.name}</Typography>
+                    <Typography>${item.price}</Typography>
                   </CardContent>
                 </Card>
               </Box>

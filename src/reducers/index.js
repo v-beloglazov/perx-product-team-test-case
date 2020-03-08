@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
-import goodsSlice from '../features/goods/goodsSlice'
+import goodsSlice from '../features/goods/goodsSlice';
+import cartSlice from '../features/cart/cartSlice';
 
 export default combineReducers({
-  goods: goodsSlice
+  goods: goodsSlice,
+  cart: cartSlice,
 });
