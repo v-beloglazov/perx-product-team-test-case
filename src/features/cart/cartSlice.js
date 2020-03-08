@@ -23,9 +23,20 @@ const cart = createSlice({
     removeFromCart(state, { payload: itemName }) {
       state.totalCount = state.totalCount - 1;
 
-      if (state.itemsCountByName[itemName] > 1) {
-        state.itemsCountByName[itemName] = state.itemsCountByName[itemName] - 1;
+      const itemCount = state.itemsCountByName[itemName];
+      if (itemCount > 1) {
+        state.itemsCountByName[itemName] = Math.max(itemCount - 1, 0);
       } else {
+        state.itemsCountByName = Object.keys(state.itemsCountByName).reduce(
+          (acc, item) => {
+            if (item !== itemName) {
+              const newAcc = { ...acc, item: state.itemsCountByName[item] };
+              return newAcc;
+            }
+            return acc;
+          },
+          {}
+        );
         state.items = state.items.filter(name => name !== itemName);
       }
     },

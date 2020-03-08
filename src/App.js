@@ -14,11 +14,18 @@ import {
   CardMedia,
   CircularProgress,
   CardContent,
+  CardActions,
+  Button,
+  Badge,
 } from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGoods } from './features/goods/goodsSlice';
 import { getImageUrl } from './api';
+import { addToCart, removeFromCart } from './features/cart/cartSlice';
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -45,13 +52,18 @@ const useStyles = makeStyles(() => ({
   },
   card: {
     display: 'flex',
-    maxWidth: '350px'
+    alignItems: 'center',
+    maxWidth: '350px',
+  },
+  cartContentWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
   },
   itemImage: {
     height: 100,
     width: 100,
     objectFit: 'contain',
-    margin: '5px'
+    margin: '5px',
   },
 }));
 
@@ -63,7 +75,12 @@ function App({ initialDealers }) {
     dispatch(fetchGoods(initialDealers));
   }, [dispatch, initialDealers]);
 
+  const { items: cartItems, itemsCountByName, totalCount } = useSelector(
+    state => state.cart
+  );
+
   const classes = useStyles();
+
   if (goodsLoading) {
     return <CircularProgress />;
   }
@@ -76,8 +93,10 @@ function App({ initialDealers }) {
             <Typography variant='h6' className={classes.title}>
               eShop
             </Typography>
-            <IconButton color='inherit'>
-              <ShoppingCartIcon />
+            <IconButton color='inherit' title="Cart">
+              <Badge badgeContent={totalCount} color='secondary'>
+                <ShoppingCartIcon />
+              </Badge>
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -86,9 +105,15 @@ function App({ initialDealers }) {
       <Container>
         <Box my={2}>
           {goods.map(item => {
+            const itemInCart = cartItems.includes(item.name);
+            const itemCount = itemsCountByName[item.name];
+
+            const handleAdd = () => dispatch(addToCart(item.name));
+            const handleRemove = () => dispatch(removeFromCart(item.name));
+
             return (
               <Box mb={2} key={item.name}>
-                <Card className={classes.card} variant="outlined">
+                <Card className={classes.card} variant='outlined'>
                   <CardMedia
                     component='img'
                     alt={item.name}
@@ -96,10 +121,30 @@ function App({ initialDealers }) {
                     title={item.name}
                     image={getImageUrl(item.image)}
                   />
-                  <CardContent>
-                    <Typography gutterBottom variant="h6">{item.name}</Typography>
-                    <Typography>${item.price}</Typography>
-                  </CardContent>
+                  <div className={classes.cartContentWrapper}>
+                    <CardContent>
+                      <Typography gutterBottom variant='h6'>
+                        {item.name}
+                      </Typography>
+                      <Typography>${item.price}</Typography>
+                    </CardContent>
+                    <CardActions>
+                      {!itemInCart && (
+                        <Button onClick={handleAdd} startIcon={<AddShoppingCartIcon />}>Add to cart</Button>
+                      )}
+                      {itemInCart && (
+                        <>
+                          <Button aria-label='reduce' onClick={handleRemove}>
+                            <RemoveIcon />
+                          </Button>
+                          <Typography>{itemCount}</Typography>
+                          <Button aria-label='increase' onClick={handleAdd}>
+                            <AddIcon />
+                          </Button>
+                        </>
+                      )}
+                    </CardActions>
+                  </div>
                 </Card>
               </Box>
             );
