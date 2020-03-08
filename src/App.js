@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -70,14 +71,12 @@ const useStyles = makeStyles(() => ({
 function App({ initialDealers }) {
   const dispatch = useDispatch();
 
-  const { goods, loading: goodsLoading } = useSelector(state => state.goods);
+  const { loading: goodsLoading } = useSelector(state => state.goods);
   useEffect(() => {
     dispatch(fetchGoods(initialDealers));
   }, [dispatch, initialDealers]);
 
-  const { items: cartItems, itemsCountByName, totalCount } = useSelector(
-    state => state.cart
-  );
+  const { totalCount } = useSelector(state => state.cart);
 
   const classes = useStyles();
 
@@ -85,7 +84,7 @@ function App({ initialDealers }) {
     return <CircularProgress />;
   }
   return (
-    <React.Fragment>
+    <Router>
       <CssBaseline />
       <ElevationScroll>
         <AppBar>
@@ -93,7 +92,12 @@ function App({ initialDealers }) {
             <Typography variant='h6' className={classes.title}>
               eShop
             </Typography>
-            <IconButton color='inherit' title="Cart">
+            <IconButton
+              color='inherit'
+              title='Cart'
+              component={Link}
+              to='/cart'
+            >
               <Badge badgeContent={totalCount} color='secondary'>
                 <ShoppingCartIcon />
               </Badge>
@@ -104,55 +108,77 @@ function App({ initialDealers }) {
       <Toolbar />
       <Container>
         <Box my={2}>
-          {goods.map(item => {
-            const itemInCart = cartItems.includes(item.name);
-            const itemCount = itemsCountByName[item.name];
-
-            const handleAdd = () => dispatch(addToCart(item.name));
-            const handleRemove = () => dispatch(removeFromCart(item.name));
-
-            return (
-              <Box mb={2} key={item.name}>
-                <Card className={classes.card} variant='outlined'>
-                  <CardMedia
-                    component='img'
-                    alt={item.name}
-                    className={classes.itemImage}
-                    title={item.name}
-                    image={getImageUrl(item.image)}
-                  />
-                  <div className={classes.cartContentWrapper}>
-                    <CardContent>
-                      <Typography gutterBottom variant='h6'>
-                        {item.name}
-                      </Typography>
-                      <Typography>${item.price}</Typography>
-                    </CardContent>
-                    <CardActions>
-                      {!itemInCart && (
-                        <Button onClick={handleAdd} startIcon={<AddShoppingCartIcon />}>Add to cart</Button>
-                      )}
-                      {itemInCart && (
-                        <>
-                          <Button aria-label='reduce' onClick={handleRemove}>
-                            <RemoveIcon />
-                          </Button>
-                          <Typography>{itemCount}</Typography>
-                          <Button aria-label='increase' onClick={handleAdd}>
-                            <AddIcon />
-                          </Button>
-                        </>
-                      )}
-                    </CardActions>
-                  </div>
-                </Card>
-              </Box>
-            );
-          })}
+          <Switch>
+            <Route exact path='/'>
+              <HomePage />
+            </Route>
+            <Route path='/cart'>
+              <CartPage />
+            </Route>
+          </Switch>
         </Box>
       </Container>
-    </React.Fragment>
+    </Router>
   );
 }
 
 export default App;
+
+function HomePage() {
+  const dispatch = useDispatch();
+  const classes = useStyles();
+  const { goods } = useSelector(state => state.goods);
+  const { items: cartItems, itemsCountByName } = useSelector(
+    state => state.cart
+  );
+
+  return goods.map(item => {
+    const itemInCart = cartItems.includes(item.name);
+    const itemCount = itemsCountByName[item.name];
+    const handleAdd = () => dispatch(addToCart(item.name));
+    const handleRemove = () => dispatch(removeFromCart(item.name));
+    return (
+      <Box mb={2} key={item.name}>
+        <Card className={classes.card} variant='outlined'>
+          <CardMedia
+            component='img'
+            alt={item.name}
+            className={classes.itemImage}
+            title={item.name}
+            image={getImageUrl(item.image)}
+          />
+          <div className={classes.cartContentWrapper}>
+            <CardContent>
+              <Typography gutterBottom variant='h6'>
+                {item.name}
+              </Typography>
+              <Typography>${item.price}</Typography>
+            </CardContent>
+            <CardActions>
+              {!itemInCart && (
+                <Button onClick={handleAdd} startIcon={<AddShoppingCartIcon />}>
+                  Add to cart
+                </Button>
+              )}
+              {itemInCart && (
+                <>
+                  <Button aria-label='reduce' onClick={handleRemove}>
+                    <RemoveIcon />
+                  </Button>
+                  <Typography>{itemCount}</Typography>
+                  <Button aria-label='increase' onClick={handleAdd}>
+                    <AddIcon />
+                  </Button>
+                </>
+              )}
+            </CardActions>
+          </div>
+        </Card>
+      </Box>
+    );
+  });
+}
+
+function CartPage() {
+  return null;
+}
