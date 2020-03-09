@@ -18,15 +18,24 @@ import {
   CardActions,
   Button,
   Badge,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGoods } from './features/goods/goodsSlice';
 import { getImageUrl } from './api';
-import { addToCart, removeFromCart } from './features/cart/cartSlice';
+import {
+  addToCart,
+  removeFromCart,
+  deleteFromCart,
+} from './features/cart/cartSlice';
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -47,9 +56,11 @@ ElevationScroll.propTypes = {
   children: PropTypes.element.isRequired,
 };
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1,
+    color: 'inherit',
+    textDecoration: 'none',
   },
   card: {
     display: 'flex',
@@ -65,6 +76,15 @@ const useStyles = makeStyles(() => ({
     width: 100,
     objectFit: 'contain',
     margin: '5px',
+  },
+  cartHeader: {
+    display: 'flex',
+  },
+  cartTitle: {
+    flexGrow: 1,
+  },
+  clearCartButton: {
+    alignSelf: 'flex-end',
   },
 }));
 
@@ -89,7 +109,12 @@ function App({ initialDealers }) {
       <ElevationScroll>
         <AppBar>
           <Toolbar>
-            <Typography variant='h6' className={classes.title}>
+            <Typography
+              variant='h6'
+              component={Link}
+              to='/'
+              className={classes.title}
+            >
               eShop
             </Typography>
             <IconButton
@@ -137,6 +162,7 @@ function HomePage() {
     const itemCount = itemsCountByName[item.name];
     const handleAdd = () => dispatch(addToCart(item.name));
     const handleRemove = () => dispatch(removeFromCart(item.name));
+
     return (
       <Box mb={2} key={item.name}>
         <Card className={classes.card} variant='outlined'>
@@ -180,5 +206,86 @@ function HomePage() {
 }
 
 function CartPage() {
-  return null;
+  const dispatch = useDispatch();
+  const classes = useStyles();
+
+  const { items: cartItems, itemsCountByName } = useSelector(
+    state => state.cart
+  );
+  const { goods } = useSelector(state => state.goods);
+
+  if (cartItems.length === 0) {
+    return (
+      <Typography>
+        No items in cart. You can add it at <Link to='/'>home page</Link>
+      </Typography>
+    );
+  }
+
+  const totalAmount = cartItems
+    .reduce((acc, name) => {
+      const item = goods.find(item => item.name === name);
+      const { price } = item;
+      const itemCount = itemsCountByName[item.name];
+      const totalPrice = price * itemCount;
+      const newAcc = acc + totalPrice;
+      return newAcc;
+    }, 0)
+    .toFixed(2);
+
+  return (
+    <>
+      <div className={classes.cartHeader}>
+        <Typography className={classes.cartTitle} variant='h2'>
+          Cart
+        </Typography>
+        <Button className={classes.clearCartButton} color='secondary'>
+          Clear cart
+        </Button>
+      </div>
+      <List>
+        {cartItems.map(name => {
+          const item = goods.find(item => item.name === name);
+          const { price } = item;
+          const itemCount = itemsCountByName[item.name];
+          const totalPrice = (price * itemCount).toFixed(2);
+
+          const handleAdd = () => dispatch(addToCart(name));
+          const handleRemove = () => dispatch(removeFromCart(name));
+          const handleDelete = () => dispatch(deleteFromCart(name));
+
+          return (
+            <ListItem key={name} alignItems='center' divider>
+              <ListItemText
+                primary={name}
+                secondary={
+                  <>
+                    ${item.price} x {itemCount} = ${totalPrice}
+                  </>
+                }
+              />
+              <Button aria-label='reduce' onClick={handleRemove}>
+                <RemoveIcon />
+              </Button>
+              <Typography>{itemCount}</Typography>
+              <Button aria-label='increase' onClick={handleAdd}>
+                <AddIcon />
+              </Button>
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge='end'
+                  aria-label='delete'
+                  onClick={handleDelete}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          );
+        })}
+      </List>
+      Total amount:
+      <Typography>${totalAmount}</Typography>
+    </>
+  );
 }

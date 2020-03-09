@@ -6,6 +6,20 @@ const initialState = {
   totalCount: 0,
 };
 
+function deleteItem(state, itemName) {
+  state.itemsCountByName = Object.keys(state.itemsCountByName).reduce(
+    (acc, item) => {
+      if (item !== itemName) {
+        const newAcc = { ...acc, [item]: state.itemsCountByName[item] };
+        return newAcc;
+      }
+      return acc;
+    },
+    {}
+  );
+  state.items = state.items.filter(name => name !== itemName);
+}
+
 const cart = createSlice({
   name: 'cart',
   initialState,
@@ -27,22 +41,15 @@ const cart = createSlice({
       if (itemCount > 1) {
         state.itemsCountByName[itemName] = Math.max(itemCount - 1, 0);
       } else {
-        state.itemsCountByName = Object.keys(state.itemsCountByName).reduce(
-          (acc, item) => {
-            if (item !== itemName) {
-              const newAcc = { ...acc, item: state.itemsCountByName[item] };
-              return newAcc;
-            }
-            return acc;
-          },
-          {}
-        );
-        state.items = state.items.filter(name => name !== itemName);
+        deleteItem(state, itemName);
       }
+    },
+    deleteFromCart(state, { payload: itemName }) {
+      deleteItem(state, itemName);
     },
   },
 });
 
-export const { addToCart, removeFromCart } = cart.actions;
+export const { addToCart, removeFromCart, deleteFromCart } = cart.actions;
 
 export default cart.reducer;
