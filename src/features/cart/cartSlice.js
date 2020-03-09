@@ -45,8 +45,12 @@ const cart = createSlice({
       }
     },
     deleteFromCart(state, { payload: itemName }) {
+      const itemCount = state.itemsCountByName[itemName];
+      state.totalCount = state.totalCount - itemCount;
+      
       deleteItem(state, itemName);
     },
+    clearCart(state) {},
   },
 });
 
