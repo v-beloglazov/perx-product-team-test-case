@@ -2,12 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
+import throttle from 'lodash/throttle';
 
 import './index.css';
 
 import rootReducer from './reducers';
 import { loadState, saveState } from './localStorage';
-import throttle from 'lodash/throttle';
 
 const persistedState = loadState();
 const store = configureStore({
@@ -15,11 +15,13 @@ const store = configureStore({
   preloadedState: persistedState,
 });
 
-store.subscribe(throttle(() => {
-  saveState({
-    cart: store.getState().cart,
-  });
-}, 1000));
+store.subscribe(
+  throttle(() => {
+    saveState({
+      cart: store.getState().cart,
+    });
+  }, 1000)
+);
 
 if (process.env.NODE_ENV === 'development' && module.hot) {
   module.hot.accept('./reducers', () => {
@@ -31,13 +33,14 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 const render = initialData => {
   const App = require('./App').default;
 
-  const storedInitialData = JSON.parse(localStorage.getItem('initialData'));
+  const serializedInitialData = localStorage.getItem('initialData');
 
   let dealers;
 
   if (initialData) {
     dealers = initialData.dealers;
-  } else if (storedInitialData) {
+  } else if (serializedInitialData) {
+    const storedInitialData = JSON.parse(serializedInitialData);
     dealers = storedInitialData.dealers;
   }
 
@@ -62,7 +65,7 @@ const initApp = initialData => {
 window.initReactApp = initApp;
 
 if (process.env.NODE_ENV === 'development' && module.hot) {
-  module.hot.accept('./App', render);
+  module.hot.accept('./App', () => render());
 }
 
 // If you want your app to work offline and load faster, you can change
