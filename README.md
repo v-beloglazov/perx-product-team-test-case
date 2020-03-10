@@ -2,6 +2,10 @@
 
 React, Redux, Material-UI
 
+## Live demo
+
+https://perx-product-team-test-case.now.sh/
+
 ## Local run
 
 1. Clone project
