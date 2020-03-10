@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 import {
   IconButton,
   ListItem,
@@ -64,5 +65,9 @@ function CartItem({ name }) {
     </ListItem>
   );
 }
+
+CartItem.propTypes = {
+  name: PropTypes.string.isRequired,
+};
 
 export default CartItem;

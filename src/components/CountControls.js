@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { IconButton, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -32,5 +33,11 @@ function CountControls({ onAdd, onRemove, count = 0 }) {
     </>
   );
 }
+
+CountControls.propTypes = {
+  onAdd: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  count: PropTypes.number.isRequired,
+};
 
 export default CountControls;
