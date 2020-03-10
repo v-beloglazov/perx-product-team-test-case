@@ -2,17 +2,18 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import { CircularProgress, Typography } from '@material-ui/core';
-import ProductCard from '../components/ProductCard';
+import ProductCard from './ProductCard';
 
-function HomePage() {
-  const { loading: goodsLoading } = useSelector(state => state.goods);
-  const { goods } = useSelector(state => state.goods);
+function ProductsPage() {
+  const { products, loading: productsLoading } = useSelector(
+    state => state.products
+  );
 
-  if (goodsLoading) {
+  if (productsLoading) {
     return <CircularProgress />;
   }
 
-  const productList = goods.map(({ name, price, image }) => {
+  const productList = products.map(({ name, price, image }) => {
     return (
       <Box m={2} key={name}>
         <ProductCard name={name} price={price} imagePath={image} />
@@ -28,4 +29,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default ProductsPage;

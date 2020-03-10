@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { Button, List, makeStyles } from '@material-ui/core';
-import { clearCart } from '../features/cart/cartSlice';
-import CartItem from '../components/CartItem';
+import { clearCart } from './cartSlice';
+import CartItem from './CartItem';
 
 const useStyles = makeStyles(() => ({
   cartHeader: {
@@ -19,9 +19,9 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const getTotalAmount = (cartItems, goods, itemsCountByName) =>
+const getTotalAmount = (cartItems, products, itemsCountByName) =>
   cartItems.reduce((acc, name) => {
-    const item = goods.find(item => item.name === name);
+    const item = products.find(item => item.name === name);
     if (!item) {
       return acc;
     }
@@ -39,13 +39,13 @@ function CartPage() {
   const { items: cartItems, itemsCountByName } = useSelector(
     state => state.cart
   );
-  const { goods } = useSelector(state => state.goods);
+  const { products } = useSelector(state => state.products);
 
   const hasItemsInCart = cartItems.length !== 0;
 
   const totalAmount = getTotalAmount(
     cartItems,
-    goods,
+    products,
     itemsCountByName
   ).toFixed(2);
 

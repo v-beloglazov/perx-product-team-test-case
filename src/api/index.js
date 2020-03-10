@@ -4,7 +4,7 @@ const baseUrl = 'https://murmuring-tor-81614.herokuapp.com/';
 const baseApiUrl = new URL('api', baseUrl).toString();
 axios.defaults.baseURL = baseApiUrl;
 
-export async function getGoods(dealers) {
+export async function getProducts(dealers) {
   try {
     const { data } = await axios.get('goods', {
       params: dealers && new URLSearchParams({ dealers }),

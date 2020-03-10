@@ -10,9 +10,9 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import { getImageUrl } from '../api';
-import { addToCart, removeFromCart } from '../features/cart/cartSlice';
-import CountControls from './CountControls';
+import { getImageUrl } from '../../api';
+import { addToCart, removeFromCart } from '../cart/cartSlice';
+import CountControls from '../../components/CountControls';
 
 const useStyles = makeStyles(theme => ({
   card: {

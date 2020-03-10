@@ -13,8 +13,8 @@ import {
   addToCart,
   removeFromCart,
   deleteFromCart,
-} from '../features/cart/cartSlice';
-import CountControls from './CountControls';
+} from './cartSlice';
+import CountControls from '../../components/CountControls';
 
 const useStyles = makeStyles(theme => ({
   secondaryAction: {
@@ -26,10 +26,10 @@ function CartItem({ name }) {
   const dispatch = useDispatch();
   const classes = useStyles();
 
-  const { goods } = useSelector(state => state.goods);
+  const { products } = useSelector(state => state.products);
   const { itemsCountByName } = useSelector(state => state.cart);
 
-  const item = goods.find(item => item.name === name);
+  const item = products.find(item => item.name === name);
   if (!item) {
     return null;
   }
