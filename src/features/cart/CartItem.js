@@ -9,11 +9,7 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import {
-  addToCart,
-  removeFromCart,
-  deleteFromCart,
-} from './cartSlice';
+import { addToCart, removeFromCart, deleteFromCart } from './cartSlice';
 import CountControls from '../../components/CountControls';
 
 const useStyles = makeStyles(theme => ({
@@ -58,7 +54,12 @@ function CartItem({ name }) {
         count={itemCount}
       />
       <ListItemSecondaryAction className={classes.secondaryAction}>
-        <IconButton edge='end' aria-label='delete' onClick={handleDelete}>
+        <IconButton
+          edge='end'
+          aria-label='delete'
+          onClick={handleDelete}
+          size='small'
+        >
           <DeleteIcon />
         </IconButton>
       </ListItemSecondaryAction>

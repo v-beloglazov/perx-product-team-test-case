@@ -6,6 +6,10 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
 const useStyles = makeStyles(theme => ({
+  wrapper: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   itemCount: {
     margin: '0 0.5em',
   },
@@ -17,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 function CountControls({ onAdd, onRemove, count = 0 }) {
   const classes = useStyles();
   return (
-    <>
+    <div className={classes.wrapper}>
       <IconButton aria-label='reduce' onClick={onRemove} size='small'>
         <RemoveIcon />
       </IconButton>
@@ -30,7 +34,7 @@ function CountControls({ onAdd, onRemove, count = 0 }) {
       >
         <AddIcon />
       </IconButton>
-    </>
+    </div>
   );
 }
 

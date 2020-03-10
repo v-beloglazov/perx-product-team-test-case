@@ -1,10 +1,21 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import Box from '@material-ui/core/Box';
-import { CircularProgress, Typography } from '@material-ui/core';
+import { CircularProgress, Typography, makeStyles } from '@material-ui/core';
 import ProductCard from './ProductCard';
 
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    overflow: 'hidden',
+    justifyContent: 'center',
+    marginTop: theme.spacing(1),
+  },
+}));
+
 function ProductsPage() {
+  const classes = useStyles();
+
   const { products, loading: productsLoading } = useSelector(
     state => state.products
   );
@@ -13,13 +24,15 @@ function ProductsPage() {
     return <CircularProgress />;
   }
 
-  const productList = products.map(({ name, price, image }) => {
-    return (
-      <Box m={2} key={name}>
-        <ProductCard name={name} price={price} imagePath={image} />
-      </Box>
-    );
-  });
+  const productList = (
+    <div className={classes.root}>
+      {products.map(({ name, price, image }) => {
+        return (
+          <ProductCard name={name} price={price} imagePath={image} key={name} />
+        );
+      })}
+    </div>
+  );
 
   return (
     <>

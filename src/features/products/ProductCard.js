@@ -8,21 +8,34 @@ import {
   CardContent,
   Button,
   makeStyles,
+  useMediaQuery,
+  useTheme,
 } from '@material-ui/core';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import classNames from 'classnames';
 import { getImageUrl } from '../../api';
 import { addToCart, removeFromCart } from '../cart/cartSlice';
 import CountControls from '../../components/CountControls';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   card: {
     display: 'flex',
     alignItems: 'center',
-    maxWidth: '350px',
+    maxWidth: '300px',
+    flexBasis: '300px',
+    margin: theme.spacing(1),
+  },
+  xsCard: {
+    flexDirection: 'column',
   },
   cardContentWrapper: {
     display: 'flex',
     flexDirection: 'column',
+    width: '100%',
+  },
+  xsCardContentWrapper: {
+    alignSelf: 'flex-start',
   },
   itemImage: {
     height: 100,
@@ -30,18 +43,24 @@ const useStyles = makeStyles(theme => ({
     objectFit: 'contain',
     margin: theme.spacing(2),
   },
-
   actionsWrapper: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     padding: theme.spacing(2),
-    height: '68px',
+    minHeight: '68px',
+  },
+  viewInCartButton: {
+    marginTop: theme.spacing(1),
   },
 }));
 
 function ProductCard({ name, imagePath, price = 0 }) {
   const dispatch = useDispatch();
   const classes = useStyles();
+  const theme = useTheme();
+  const xsScreen = useMediaQuery(theme.breakpoints.down('xs'));
+
   const { items: cartItems, itemsCountByName } = useSelector(
     state => state.cart
   );
@@ -56,8 +75,18 @@ function ProductCard({ name, imagePath, price = 0 }) {
     return null;
   }
 
+  const cardClass = classNames({
+    [classes.card]: true,
+    [classes.xsCard]: xsScreen,
+  });
+
+  const cardContentWrapperClass = classNames({
+    [classes.cardContentWrapper]: true,
+    [classes.xsCardContentWrapper]: xsScreen,
+  });
+
   return (
-    <Card className={classes.card} variant='outlined'>
+    <Card className={cardClass} variant='outlined'>
       <CardMedia
         component='img'
         alt={name}
@@ -65,7 +94,7 @@ function ProductCard({ name, imagePath, price = 0 }) {
         className={classes.itemImage}
         image={getImageUrl(imagePath)}
       />
-      <div className={classes.cardContentWrapper}>
+      <div className={cardContentWrapperClass}>
         <CardContent>
           <Typography gutterBottom variant='h6'>
             {name}
@@ -79,11 +108,21 @@ function ProductCard({ name, imagePath, price = 0 }) {
             </Button>
           )}
           {itemInCart && (
-            <CountControls
-              count={itemCount}
-              onAdd={handleAdd}
-              onRemove={handleRemove}
-            />
+            <>
+              <CountControls
+                count={itemCount}
+                onAdd={handleAdd}
+                onRemove={handleRemove}
+              />
+              <Button
+                className={classes.viewInCartButton}
+                variant='outlined'
+                component={Link}
+                to='/cart'
+              >
+                View in cart
+              </Button>
+            </>
           )}
         </div>
       </div>
