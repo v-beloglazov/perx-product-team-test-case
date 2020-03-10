@@ -5,6 +5,7 @@ const initialState = {
   loading: false,
   error: null,
   goods: [],
+  initialDealers: null,
 };
 
 const goods = createSlice({

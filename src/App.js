@@ -35,6 +35,7 @@ import {
   addToCart,
   removeFromCart,
   deleteFromCart,
+  clearCart,
 } from './features/cart/cartSlice';
 
 function ElevationScroll(props) {
@@ -67,7 +68,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     maxWidth: '350px',
   },
-  cartContentWrapper: {
+  cardContentWrapper: {
     display: 'flex',
     flexDirection: 'column',
   },
@@ -86,12 +87,23 @@ const useStyles = makeStyles(theme => ({
   clearCartButton: {
     alignSelf: 'flex-end',
   },
+  itemCount: {
+    margin: '0 0.5em',
+  },
+  addButton: {
+    margin: '0',
+  },
+  actionsWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(2),
+    height: '68px',
+  },
 }));
 
 function App({ initialDealers }) {
   const dispatch = useDispatch();
 
-  const { loading: goodsLoading } = useSelector(state => state.goods);
   useEffect(() => {
     dispatch(fetchGoods(initialDealers));
   }, [dispatch, initialDealers]);
@@ -100,9 +112,6 @@ function App({ initialDealers }) {
 
   const classes = useStyles();
 
-  if (goodsLoading) {
-    return <CircularProgress />;
-  }
   return (
     <Router>
       <CssBaseline />
@@ -149,60 +158,100 @@ function App({ initialDealers }) {
 
 export default App;
 
-function HomePage() {
-  const dispatch = useDispatch();
+function CountControls({ onAdd, onRemove, count = 0 }) {
   const classes = useStyles();
-  const { goods } = useSelector(state => state.goods);
+
+  return (
+    <>
+      <IconButton aria-label='reduce' onClick={onRemove} size='small'>
+        <RemoveIcon />
+      </IconButton>
+      <Typography className={classes.itemCount}>{count}</Typography>
+      <IconButton
+        className={classes.addButton}
+        aria-label='increase'
+        onClick={onAdd}
+        size='small'
+      >
+        <AddIcon />
+      </IconButton>
+    </>
+  );
+}
+
+function ProductCard({ name, imagePath, price = 0 }) {
+  const dispatch = useDispatch();
   const { items: cartItems, itemsCountByName } = useSelector(
     state => state.cart
   );
+  const itemInCart = cartItems.includes(name);
+  const itemCount = itemsCountByName[name];
+  const handleAdd = () => dispatch(addToCart(name));
+  const handleRemove = () => dispatch(removeFromCart(name));
 
-  return goods.map(item => {
-    const itemInCart = cartItems.includes(item.name);
-    const itemCount = itemsCountByName[item.name];
-    const handleAdd = () => dispatch(addToCart(item.name));
-    const handleRemove = () => dispatch(removeFromCart(item.name));
+  const classes = useStyles();
 
+  if (!name) {
+    return null;
+  }
+
+  return (
+    <Card className={classes.card} variant='outlined'>
+      <CardMedia
+        component='img'
+        alt={name}
+        title={name}
+        className={classes.itemImage}
+        image={getImageUrl(imagePath)}
+      />
+      <div className={classes.cardContentWrapper}>
+        <CardContent>
+          <Typography gutterBottom variant='h6'>
+            {name}
+          </Typography>
+          <Typography>${price.toFixed(2)}</Typography>
+        </CardContent>
+        <div className={classes.actionsWrapper}>
+          {!itemInCart && (
+            <Button onClick={handleAdd} startIcon={<AddShoppingCartIcon />}>
+              Add to cart
+            </Button>
+          )}
+          {itemInCart && (
+            <CountControls
+              count={itemCount}
+              onAdd={handleAdd}
+              onRemove={handleRemove}
+            />
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+ProductCard.propTypes = {
+  name: PropTypes.string.isRequired,
+  imagePath: PropTypes.string.isRequired,
+  price: PropTypes.number.isRequired,
+};
+
+function HomePage() {
+  const { loading: goodsLoading } = useSelector(state => state.goods);
+
+  const { goods } = useSelector(state => state.goods);
+  if (goodsLoading) {
+    return <CircularProgress />;
+  }
+  const productList = goods.map(({ name, price, image }) => {
     return (
-      <Box mb={2} key={item.name}>
-        <Card className={classes.card} variant='outlined'>
-          <CardMedia
-            component='img'
-            alt={item.name}
-            className={classes.itemImage}
-            title={item.name}
-            image={getImageUrl(item.image)}
-          />
-          <div className={classes.cartContentWrapper}>
-            <CardContent>
-              <Typography gutterBottom variant='h6'>
-                {item.name}
-              </Typography>
-              <Typography>${item.price}</Typography>
-            </CardContent>
-            <CardActions>
-              {!itemInCart && (
-                <Button onClick={handleAdd} startIcon={<AddShoppingCartIcon />}>
-                  Add to cart
-                </Button>
-              )}
-              {itemInCart && (
-                <>
-                  <Button aria-label='reduce' onClick={handleRemove}>
-                    <RemoveIcon />
-                  </Button>
-                  <Typography>{itemCount}</Typography>
-                  <Button aria-label='increase' onClick={handleAdd}>
-                    <AddIcon />
-                  </Button>
-                </>
-              )}
-            </CardActions>
-          </div>
-        </Card>
+      <Box mb={2} key={name}>
+        <ProductCard name={name} price={price} imagePath={image} />
       </Box>
     );
   });
+
+  return productList;
 }
 
 function CartPage() {
@@ -212,15 +261,9 @@ function CartPage() {
   const { items: cartItems, itemsCountByName } = useSelector(
     state => state.cart
   );
-  const { goods } = useSelector(state => state.goods);
+  const hasItemsInCart = cartItems.length !== 0;
 
-  if (cartItems.length === 0) {
-    return (
-      <Typography>
-        No items in cart. You can add it at <Link to='/'>home page</Link>
-      </Typography>
-    );
-  }
+  const { goods } = useSelector(state => state.goods);
 
   const totalAmount = cartItems
     .reduce((acc, name) => {
@@ -233,59 +276,90 @@ function CartPage() {
     }, 0)
     .toFixed(2);
 
+  const handleClear = () => dispatch(clearCart());
+
   return (
     <>
       <div className={classes.cartHeader}>
         <Typography className={classes.cartTitle} variant='h2'>
           Cart
         </Typography>
-        <Button className={classes.clearCartButton} color='secondary'>
-          Clear cart
-        </Button>
+        {hasItemsInCart && (
+          <Button
+            className={classes.clearCartButton}
+            color='secondary'
+            onClick={handleClear}
+          >
+            Clear cart
+          </Button>
+        )}
       </div>
-      <List>
-        {cartItems.map(name => {
-          const item = goods.find(item => item.name === name);
-          const { price } = item;
-          const itemCount = itemsCountByName[item.name];
-          const totalPrice = (price * itemCount).toFixed(2);
+      {!hasItemsInCart && (
+        <Box mt={2} ml={2}>
+          <Typography>
+            No items in cart. You can add it at <Link to='/'>home page</Link>
+          </Typography>
+        </Box>
+      )}
+      {hasItemsInCart && (
+        <>
+          <List>
+            {cartItems.map(name => {
+              const item = goods.find(item => item.name === name);
+              const { price } = item;
+              const itemCount = itemsCountByName[item.name];
+              const totalPrice = (price * itemCount).toFixed(2);
 
-          const handleAdd = () => dispatch(addToCart(name));
-          const handleRemove = () => dispatch(removeFromCart(name));
-          const handleDelete = () => dispatch(deleteFromCart(name));
+              const handleAdd = () => dispatch(addToCart(name));
+              const handleRemove = () => dispatch(removeFromCart(name));
+              const handleDelete = () => dispatch(deleteFromCart(name));
 
-          return (
-            <ListItem key={name} alignItems='center' divider>
-              <ListItemText
-                primary={name}
-                secondary={
-                  <>
-                    ${item.price} x {itemCount} = ${totalPrice}
-                  </>
-                }
-              />
-              <Button aria-label='reduce' onClick={handleRemove}>
-                <RemoveIcon />
-              </Button>
-              <Typography>{itemCount}</Typography>
-              <Button aria-label='increase' onClick={handleAdd}>
-                <AddIcon />
-              </Button>
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge='end'
-                  aria-label='delete'
-                  onClick={handleDelete}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
-      </List>
-      Total amount:
-      <Typography>${totalAmount}</Typography>
+              return (
+                <ListItem key={name} alignItems='center' divider>
+                  <ListItemText
+                    primary={name}
+                    secondary={
+                      <>
+                        ${item.price} x {itemCount} = ${totalPrice}
+                      </>
+                    }
+                  />
+                  <IconButton
+                    aria-label='reduce'
+                    size='small'
+                    onClick={handleRemove}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                  <Typography className={classes.itemCount}>
+                    {itemCount}
+                  </Typography>
+                  <IconButton
+                    aria-label='increase'
+                    size='small'
+                    onClick={handleAdd}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge='end'
+                      aria-label='delete'
+                      onClick={handleDelete}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              );
+            })}
+          </List>
+          <Box mx={2}>
+            <Typography variant='subtitle1'>Total amount:</Typography>
+            <Typography variant='h6'>${totalAmount}</Typography>
+          </Box>
+        </>
+      )}
     </>
   );
 }

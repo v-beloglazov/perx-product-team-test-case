@@ -47,13 +47,22 @@ const cart = createSlice({
     deleteFromCart(state, { payload: itemName }) {
       const itemCount = state.itemsCountByName[itemName];
       state.totalCount = state.totalCount - itemCount;
-      
+
       deleteItem(state, itemName);
     },
-    clearCart(state) {},
+    clearCart(state) {
+      state.totalCount = 0;
+      state.items = [];
+      state.itemsCountByName = {};
+    },
   },
 });
 
-export const { addToCart, removeFromCart, deleteFromCart } = cart.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  deleteFromCart,
+  clearCart,
+} = cart.actions;
 
 export default cart.reducer;
