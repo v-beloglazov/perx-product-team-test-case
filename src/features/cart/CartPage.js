@@ -71,7 +71,7 @@ function CartPage() {
     cartContent = (
       <Box mt={2} ml={2}>
         <Typography>
-          No items in cart. You can add it at <Link to='/'>home page</Link>
+          No items in cart. You can add it <Link to='/'>there</Link>.
         </Typography>
       </Box>
     );
