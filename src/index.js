@@ -58,7 +58,9 @@ if (localStorage.getItem('appState') === 'inited') {
 
 const initApp = initialData => {
   localStorage.setItem('appState', 'inited');
-  localStorage.setItem('initialData', JSON.stringify(initialData));
+  if (initialData) {
+    localStorage.setItem('initialData', JSON.stringify(initialData));
+  }
   return render(initialData);
 };
 

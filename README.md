@@ -34,18 +34,14 @@ yarn start
 
 5. Open http://localhost:3000
 
-6. In developer console print and run
+You can specify dealers in `index.html` like this
 
-```javascript
-initReactApp();
-```
-
-You can specify dealers like this
-
-```javascript
-initReactApp({
-  dealers: ['0c4aab30', '1efa7e46', '86e64a33'],
-});
+```html
+<script>
+  initReactApp({
+    dealers: ['0c4aab30', '1efa7e46', '86e64a33'],
+  });
+</script>
 ```
 
 ### That's it. You awesome!
